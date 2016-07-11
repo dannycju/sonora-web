@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootbox.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+{% include "dashboard/navbar.html" with is_active_dashboard="" username=username %}
+{% autoescape off %}
+<div class="content-main container-fluid">
+    <div class="row">
+        <div class="col-sm-7 col-bookmarks">
+            <div class="dropdown folder-actions-dropdown" style="top:3px;">
+                <a href="#" id="context-menu-folder" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                    <div class="btn-actions"></div>
+                </a>
+                <ul class="dropdown-menu context-menu" aria-labelledby="context-menu-folder">
+                    <li><a href="{% url 'editfolder' folder.id %}">Edit Folder</a></li>
+                    <li class="divider"></li>
+                    <li><a href="#" id="item-rm-folder" data-folder-id="{{ folder.id }}">Remove Folder</a></li>
+                </ul>
+            </div>
+
+            <h1>
+                <span class="txt-folder">Folder</span><br>
+                <span id="folder-title">{{ folder.title }}</span>
+            </h1>
+            <div class="details clearfix">{{ folder.description }}
+                <div class="details details-full extra-details">
+                    {% if folder.keywords %}
+                        Keywords: {{ folder.keywords|join:", " }}
+                    {% else %}
+                        No keyword
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="padding:15px;"></div>
+
+            {% if bookmarks %}
+                <h2>Bookmarks</h2>
+                <div>
+                    {% for bookmark in bookmarks %}
+                        <div class="bookmark-container" data-bookmark-id="{{ bookmark.id }}">
+                            <div class="img-doc-bookmark"></div>
+                            <div class="clearfix">
+                                <div class="dropdown bookmark-actions-dropdown">
+                                    <a href="#" id="context-menu-{{ forloop.counter }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                                        <div class="btn-actions"></div>
+                                    </a>
+                                    <ul class="dropdown-menu context-menu" aria-labelledby="context-menu-{{ forloop.counter }}">
+                                        <li><a href="{% url 'editbookmark' bookmark.id %}">Edit or Move to Folder</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="#" class="item-rm-bookmark">Remove Bookmark</a></li>
+                                    </ul>
+                                </div>
+
+                                <h3>
+                                    <a href="{{ bookmark.url }}" target="_blank" class="bookmark-url bookmark-title"><b>{{ bookmark.title }}</b></a>
+                                </h3>
+                                <div class="details clearfix">
+                                    {% if bookmark.metadata.description %}
+                                        <p class="bookmark-desc">{{ bookmark.metadata.description }}</p>
+                                    {% elif bookmark.metadata.og_description %}
+                                        <p class="bookmark-desc">{{ bookmark.metadata.og_description }}</p>
+                                    {% elif bookmark.metadata.twitter_description %}
+                                        <p class="bookmark-desc">{{ bookmark.metadata.twitter_description }}</p>
+                                    {% endif %}
+                                    {% load tz %}
+                                    {% get_current_timezone as TIME_ZONE %}
+                                    <div class="details extra-details">Saved on {{ bookmark.date_created|timezone:TIME_ZONE }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p style="color:#8C8C8C;">Folder is empty</p>
+            {% endif %}
+        </div>
+
+        <div class="col-sm-5 col-sc">
+            <div>
+                <div class="sc-header clearfix">
+                    <h2>Related Literatures</h2>
+                    <div class="sc-actions">
+                        <button id="most-cited-action" class="link" type="button">Most Cited</button>
+                        <button id="most-recent-action" class="link" type="button">Most Recent</button>
+                    </div>
+                </div>
+                <div id="lit-sets" data-keywords="{{ folder.keywords|join:','|default:'' }}"></div>
+            </div>
+
+            <div>
+                <div class="sc-header clearfix">
+                    <h2>Related Questions on the Web</h2>
+                </div>
+                <div id="question-sets" data-keywords="{{ folder.keywords|join:','|default:'' }}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endautoescape %}
+<script type="text/javascript" src="{% static 'js/dashboard.js' %}"></script>
+<script type="text/javascript">
+var folderId = $("#item-rm-folder").data("folderId");
+
+var removeFolder = function(folderId) {
+    $.ajax({
+        url: "/removefolder/" + folderId + "/",
+        type: "GET",
+    }).done(function(response) {
+        console.log("Response: " + response.message);
+        if (response.message == "folder_removed") {
+            window.location.href = "{% url 'dashboard' %}";
+        }
+    }).fail(function(xhr, status, errorThrown) {
+        console.log(errorThrown);
+        window.location.href = "{% url 'dashboard' %}";
+    });
+}
+
+$("#item-rm-folder").click(function() {
+    var folderTitle = $("#folder-title").text();
+    if (folderTitle.length > 56) {
+        folderTitle = folderTitle.slice(0, 42) + '...';
+    }
+    bootbox.confirm({
+        title: 'Are you sure you want to remove "' + folderTitle + '"?',
+        message: 'It will be removed from your Sonora together with all the bookmarks inside.',
+        size: 'small',
+        animate: false,
+        closeButton: false,
+        callback: function(result) {
+            if (result) {
+                console.log('Removing folder: ' + folderId);
+                removeFolder(folderId);
+            }
+        },
+    });
+});
+</script>
+{% endblock %}

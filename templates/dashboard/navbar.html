@@ -1,0 +1,43 @@
+<nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#so-navbar">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">sonora</a>
+        </div>
+        <div class="navbar-add-bookmark">
+            <a href="{% url 'newbookmark' %}"><div class="add-bookmark-btn"></div></a>
+        </div>
+        <div class="collapse navbar-collapse" id="so-navbar">
+            <ul class="nav navbar-nav">
+                <li class="{{ dashboard_active }}"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                        <span class="display-name">
+                            {% if user.firstname %}
+                                {{ user.firstname }}
+                            {% elif user.lastname %}
+                                {{ user.lastname }}
+                            {% else %}
+                                {{ user.username }}
+                            {% endif %}
+                        </span>
+                        <div class="arrow-down"></div>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'viewprofile' user.username %}">View Profile</a></li>
+                        <li><a href="{% url 'editprofile' %}">Edit Profile</a></li>
+                        <li class="divider"></li>
+                        <li><a href="{% url 'signout' %}">Sign Out</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+

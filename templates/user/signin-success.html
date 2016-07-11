@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "css/base.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "css/user.css" %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Welcome, {{ name }}!</h3>
+    <p style="margin-top: 0; margin-bottom: 23px;">You have successfully signed in.</p>
+    <div><form class="inline" action="/signout/" method="POST">{% csrf_token %}<button class="link">Sign out</button></form></div>
+</div>
+{% endblock %}

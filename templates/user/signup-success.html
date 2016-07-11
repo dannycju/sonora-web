@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static "css/base.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "css/user.css" %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <h3>Welcome, {{ name }}!</h3>
+    <p>You have successfully signed up and in.</p>
+</div>
+{% endblock %}

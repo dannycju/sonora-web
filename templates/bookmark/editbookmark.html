@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap-select.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootbox.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+{% include "dashboard/navbar.html" with navitem_dashboard="" username=username %}
+
+<div class="container content-main">
+    <div>
+        <div class="container-centre">
+            <form action="{% url 'savebookmark' bookmark.id %}" method="POST">
+                {% csrf_token %}
+                <h1>Edit Bookmark</h1>
+                <div class="form-field">
+                    <label for="folders">Folders</label>
+                    {% if folders %}
+                        <select name="folders" class="selectpicker" autofocus>
+                            <option value="">Not In Any Folder</option>
+                            {% for folder in folders %}
+                            <option value="{{ folder.id }}"
+                                {% if folder.id == original_folder_id %} selected="selected" {% endif %}>
+                                {{ folder.title }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                </div>
+                <div class="form-field">
+                    <label for="title">Title</label>
+                    <input id="title" type="text" name="title" value="{{ bookmark.title }}" />
+                </div>
+                <div class="form-field view-only-field">
+                    <label for="url">URL</label>
+                    <input id="url" type="text" name="url" value="{{ bookmark.url }}" />
+                </div>
+                <div class="form-field">
+                    <label for="description">Description</label>
+
+                    {% if bookmark.metadata.description %}
+                        <textarea id="description" name="description">{{ bookmark.metadata.description }}</textarea>
+                    {% elif bookmark.metadata.og_description %}
+                        <textarea id="description" name="description">{{ bookmark.metadata.og_description }}</textarea>
+                    {% elif bookmark.metadata.twitter_description %}
+                        <textarea id="description" name="description">{{ bookmark.metadata.twitter_description }}</textarea>
+                    {% else %}
+                        <textarea id="description" name="description"></textarea>
+                    {% endif %}
+                </div>
+                <div class="btn-container">
+                    <a href="#" id="item-rm-bookmark" class="btn" data-bookmark-id="{{ bookmark.id }}" data-redirect-target="{{ redirect_target }}">Remove Bookmark</a>
+                    <div style="float:right;">
+                        <button id="btn-save" class="btn btn-primary btn-right">Save</button>
+                        <a href="{{ redirect_target }}"><button class="btn btn-right" type="button">Back</button></a>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+var redirectTarget = $("#item-rm-bookmark").data("redirectTarget");
+var bookmarkId = $("#item-rm-bookmark").data("bookmarkId");
+var btnSave = $("#btn-save");
+
+var removeBookmark = function(bookmarkId) {
+    $.ajax({
+        url: "/removebookmark/" + bookmarkId + "/",
+        type: "GET",
+    }).done(function(response) {
+        console.log("Response: " + response.message);
+        if (response.message == "bookmark_removed") {
+            window.location.href = redirectTarget;
+        }
+        else {
+            btnSave.prop("disabled", false);
+        }
+    }).fail(function(xhr, status, errorThrown) {
+        console.log(errorThrown);
+        btnSave.prop("disabled", false);
+    });
+}
+
+$("#item-rm-bookmark").click(function() {
+    var bookmarkTitle = $("#title").val();
+    if (bookmarkTitle.length > 56) {
+        bookmarkTitle = bookmarkTitle.slice(0, 42) + '...';
+    }
+    btnSave.prop("disabled", true);
+    bootbox.confirm({
+        title: 'Are you sure you want to remove "' + bookmarkTitle + '"?',
+        message: 'It will be removed from your Sonora.',
+        size: 'small',
+        animate: false,
+        closeButton: false,
+        callback: function(result) {
+            if (result) {
+                console.log('Removing bookmark: ' + bookmarkId);
+                removeBookmark(bookmarkId);
+            }
+            else {
+                btnSave.prop("disabled", false);
+            }
+        },
+    });
+});
+</script>
+{% endblock %}

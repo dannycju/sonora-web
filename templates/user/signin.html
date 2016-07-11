@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/user.css' %}">
+{% endblock %}
+{% block content %}
+<div class="page-container">
+    <div class="content-main">
+        <form action="{% url 'signin' %}" method="POST">
+            <h2>Sign In to Sonora</h2>
+            {% csrf_token %}
+
+            {% if message %}
+            <p class="message">{{ message }}</p>
+            {% endif %}
+
+            <div class="form-field">
+                <input type="text" name="username" placeholder="Username" value="{{ username }}" required="" />
+                <div class="error-container">
+                    <span id="username-error-msg" class="error-msg">{{ username_error_msg }}</span>
+                </div>
+            </div>
+            <div class="form-field">
+                <input type="password" name="password" placeholder="Password" value="" required="" />
+                <div class="error-container">
+                    <span id="password-error-msg" class="error-msg">{{ password_error_msg }}</span>
+                </div>
+            </div>
+            <div class="button-container">
+                <button class="btn">Sign In</button>
+            </div>
+        </form>
+        <div class="content">Don't have an account? <form class="inline" action="{% url 'signup' %}" method="POST">{% csrf_token %}<input type="hidden" name="username" value="{{ username }}" /><button class="link">Sign up now &gt;</button></form></div>
+    </div>
+</div>
+{% endblock %}

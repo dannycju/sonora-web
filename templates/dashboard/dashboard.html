@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootbox.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+{% include "dashboard/navbar.html" with dashboard_active="active" %}
+
+<div class="content-main container-fluid">
+    <div class="row">
+        <div class="col-sm-7 col-bookmarks">
+            <h2>Folders</h2>
+            <div style="margin-top:0.5em;margin-bottom:0.3em;">
+                <a href="{% url 'newfolder' %}" class="btn btn-wide">Create New Folder</a>
+            </div>
+            <div>
+                {% for folder in folders %}
+                    <div class="folder-container" data-folder-id="{{ folder.id }}">
+                        <div class="img-folder"></div>
+                        <div class="clearfix">
+                            <div class="dropdown folder-actions-dropdown">
+                                <a href="#" id="context-menu-{{ forloop.counter }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                                    <div class="btn-actions"></div>
+                                </a>
+                                <ul class="dropdown-menu context-menu" aria-labelledby="context-menu-{{ forloop.counter }}">
+                                    <li><a href="{% url 'editfolder' folder.id %}">Edit Folder</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="#" class="item-rm-folder">Remove Folder</a></li>
+                                </ul>
+                            </div>
+
+                            <h2>
+                                <a href="{% url 'viewfolder' folder.id %}" class="folder-title"><b>{{ folder.title }}</b></a>
+                            </h2>
+                            <div class="details clearfix">{{ folder.description }}
+                                <div class="details extra-details">
+                                    {% if folder.keywords %}
+                                        Keywords: {{ folder.keywords|join:", " }}
+                                    {% else %}
+                                        No keyword
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div style="padding:15px;"></div>
+
+            <h2>Other Bookmarks</h2>
+            <div>
+                {% for bookmark in bookmarks %}
+                    <div class="bookmark-container" data-bookmark-id="{{ bookmark.id }}">
+                        <div class="img-doc-bookmark"></div>
+                        <div class="clearfix">
+                            <div class="dropdown bookmark-actions-dropdown">
+                                <a href="#" id="context-menu-{{ forloop.counter }}" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="true">
+                                    <div class="btn-actions"></div>
+                                </a>
+                                <ul class="dropdown-menu context-menu" aria-labelledby="context-menu-{{ forloop.counter }}">
+                                    <li><a href="{% url 'editbookmark' bookmark.id %}">Edit or Move to Folder</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="#" class="item-rm-bookmark">Remove Bookmark</a></li>
+                                </ul>
+                            </div>
+
+                            <h3>
+                                <a href="{{ bookmark.url }}" target="_blank" class="bookmark-title"><b>{{ bookmark.title }}</b></a>
+                            </h3>
+                            <div class="details clearfix">
+                                {% if bookmark.metadata.description %}
+                                    <p class="bookmark-desc">{{ bookmark.metadata.description }}</p>
+                                {% elif bookmark.metadata.og_description %}
+                                    <p class="bookmark-desc">{{ bookmark.metadata.og_description }}</p>
+                                {% elif bookmark.metadata.twitter_description %}
+                                    <p class="bookmark-desc">{{ bookmark.metadata.twitter_description }}</p>
+                                {% endif %}
+                                {% load tz %}
+                                {% get_current_timezone as TIME_ZONE %}
+                                <div class="details extra-details">Saved on {{ bookmark.date_created|timezone:TIME_ZONE }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="col-sm-5 col-sc" style="margin-top:10px;">
+            <div>
+                <h2>Related Reseachers</h2>
+                <div id="researcher-sets" data-keywords="{{ user.topics|join:','|default:'' }}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

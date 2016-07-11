@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/profile.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="content-main">
+        <form action="{% url 'saveprofile' %}" method="POST">
+            <h2>{{ heading }}</h2>
+            {% csrf_token %}
+            <div class="form-field">
+                <label for="firstname">First Name</label>
+                <input id="firstname" type="text" name="firstname" value="{{ firstname }}" />
+            </div>
+            <div class="form-field">
+                <label for="lastname">Last Name</label>
+                <input id="lastname" type="text" name="lastname" value="{{ lastname }}" />
+            </div>
+            <div class="form-field">
+                <label for="biodata">Biodata</label>
+                <textarea id="biodata" name="biodata">{{ biodata }}</textarea>
+            </div>
+            <div class="form-field">
+                <label for="topics">Topics</label>
+                <p class="guide">Separate topics by comma</p>
+                <textarea id="topics" name="topics">{{ topics|join:", "|default:"" }}</textarea>
+            </div>
+            <div class="button-container">
+                <a href="{% url 'dashboard' %}"><button class="button button-light" type="button">Go to Dashboard</button></a>
+                <button class="button button-right">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

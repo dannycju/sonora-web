@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/profile.css' %}">
+{% endblock %}
+{% block content %}
+<div class="container">
+    <div class="content-main">
+        <h2>Profile Information</h2>
+        {% if message %}
+        <p class="message">{{ message }}</p>
+        {% endif %}
+        {% if username %}
+        <div class="profile-info">
+            <p class="label">Username</p>
+            <p>{{ username }}</p>
+        </div>
+        {% endif %}
+        <div class="profile-info">
+            <p class="label">First Name</p>
+            <p>{{ firstname|default:"-" }}</p>
+        </div>
+        <div class="profile-info">
+            <p class="label">Last Name</p>
+            <p>{{ lastname|default:"-" }}</p>
+        </div>
+        <div class="profile-info">
+            <p class="label">Biodata</p>
+            <p>{{ biodata|default:"-" }}</p>
+        </div>
+        <div class="profile-info">
+            <p class="label">Topics</p>
+            <p>{{ topics|join:", "|default:"-" }}</p>
+        </div>
+        {% if edit %}
+        <div class="button-container">
+            <a href="{% url 'dashboard' %}"><button class="button button-light" type="button">Go to Dashboard</button></a>
+            <a href="{% url 'editprofile' %}"><button class="button button-right">Edit</button></a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

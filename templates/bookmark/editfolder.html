@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block style %}
+{% load static from staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap-select.min.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/dashboard.css' %}">
+<script type="text/javascript" src="{% static 'js/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootstrap-select.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/bootbox.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+{% include "dashboard/navbar.html" with navitem_dashboard="" username=username %}
+
+<div class="container content-main">
+    <div>
+        <div class="container-centre">
+            {% if folder %}
+            <form action="{% url 'savefolder' folder.id %}" method="POST">
+            {% else %}
+            <form action="{% url 'savefolder' %}" method="POST">
+            {% endif %}
+
+                {% csrf_token %}
+                <h1>{{ title }}</h1>
+                <div class="form-field">
+                    <label for="title">Title</label>
+                    <input id="title" type="text" name="title" value="{{ folder.title }}" />
+                </div>
+                <div class="form-field">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description">{{ folder.description }}</textarea>
+                </div>
+                <div class="form-field view-only-field">
+                    <label for="keywords">Keywords</label>
+                    <p class="guide">Separate topics by comma</p>
+                    <textarea id="keywords" name="keywords">{{ folder.keywords|join:", "|default:"" }}</textarea>
+                </div>
+                <div class="btn-container">
+                    {% if folder %}
+                        <a href="#" id="item-rm-folder" class="btn" data-folder-id="{{ folder.id }}">Remove Folder</a>
+                    {% else %}
+                        <a href="{% url 'dashboard' %}" class="btn">Go to Dashboard</a>
+                    {% endif %}
+                    <button id="btn-save" class="btn btn-primary btn-right">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+var folderId = $("#item-rm-folder").data("folderId");
+var btnSave = $("#btn-save");
+
+var removeFolder = function(folderId) {
+    $.ajax({
+        url: "/removefolder/" + folderId + "/",
+        type: "GET",
+    }).done(function(response) {
+        console.log("Response: " + response.message);
+        if (response.message == "folder_removed") {
+            window.location.href = "{% url 'dashboard' %}";
+        }
+        else {
+            btnSave.prop("disabled", false);
+        }
+    }).fail(function(xhr, status, errorThrown) {
+        console.log(errorThrown);
+        btnSave.prop("disabled", false);
+    });
+}
+
+$("#item-rm-folder").click(function() {
+    var folderTitle = $("#title").val();
+    if (folderTitle.length > 56) {
+        folderTitle = folderTitle.slice(0, 42) + '...';
+    }
+    btnSave.prop("disabled", true);
+    bootbox.confirm({
+        title: 'Are you sure you want to remove "' + folderTitle + '"?',
+        message: 'It will be removed from your Sonora together with all the bookmarks inside.',
+        size: 'small',
+        animate: false,
+        closeButton: false,
+        callback: function(result) {
+            if (result) {
+                console.log('Removing folder: ' + folderId);
+                removeFolder(folderId);
+            }
+            else {
+                btnSave.prop("disabled", false);
+            }
+        },
+    });
+});
+</script>
+{% endblock %}
